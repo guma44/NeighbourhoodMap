@@ -56,9 +56,12 @@ var PlacesViewModel = function() {
   
   this.filterPlaces = function(){
       if (self.filterBy()){
+          self.filteredPlaces([]);
           for (var i = 0; i < self.places().length; i++) {
-              console.log("Adding", self.places()[i]);
-            //   self.filteredPlaces.push(self.places()[i]);
+            if (self.places()[i].name.toLowerCase().includes(self.filterBy().toLowerCase()) 
+              || self.places()[i].address.toLowerCase().includes(self.filterBy().toLowerCase())){
+              self.filteredPlaces.push(self.places()[i]);
+            }
           }
       }
       else {
