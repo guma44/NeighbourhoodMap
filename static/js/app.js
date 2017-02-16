@@ -1,5 +1,6 @@
 "use strict";
 var map;
+var markers;
 var breweries = [
     {
         name: "Unser Bier",
@@ -41,8 +42,9 @@ var Place = function(data){
 
 var PlacesViewModel = function() {
   var self = this;
+  this.places = [];
+  this.markers = [];
   this.isOpen = ko.observable(false);
-  this.places = ko.observableArray();
   this.filterBy = ko.observable("");
   this.filteredPlaces = ko.observableArray();
   // Fill the places
@@ -57,32 +59,48 @@ var PlacesViewModel = function() {
   this.filterPlaces = function(){
       if (self.filterBy()){
           self.filteredPlaces([]);
-          for (var i = 0; i < self.places().length; i++) {
-            if (self.places()[i].name.toLowerCase().includes(self.filterBy().toLowerCase()) 
-              || self.places()[i].address.toLowerCase().includes(self.filterBy().toLowerCase())){
-              self.filteredPlaces.push(self.places()[i]);
+          for (var i = 0; i < self.places.length; i++) {
+            if (self.places[i].name.toLowerCase().includes(self.filterBy().toLowerCase()) 
+              || self.places[i].address.toLowerCase().includes(self.filterBy().toLowerCase())){
+              self.filteredPlaces.push(self.places[i]);
             }
           }
       }
       else {
-          self.filteredPlaces(self.places());
+          self.filteredPlaces(self.places);
       }
   }
-  
+
+  this.createMarkers = function(){
+      for (var i = 0; i < self.places.length; i++) {
+          var marker = new google.maps.Marker({
+             position: self.places[i].location,
+             map: map,
+             title: self.places[i].name,
+             mapTypeControl: false,
+          });
+          var infowindow = new google.maps.InfoWindow({
+              content: '<span class="info-name">' + self.places[i].name + '<span>'
+          });
+          (function(marker, infowindow){
+              marker.addListener('click', function(){
+                  infowindow.open(map, marker);
+              });
+          })(marker, infowindow);
+          self.markers[i] = marker;
+          console.log(self.places[i].name)
+      }
+  }
+
   this.filterPlaces();
+  this.createMarkers();
 };
 
 // MAP INITIALIZATION
-function initMap() {
+function init() {
   map = new google.maps.Map(document.getElementById('map'), {
       center: {lat: 47.5546676, lng: 7.5594406},
-      zoom: 14,
+      zoom: 12,
   });
+  ko.applyBindings(new PlacesViewModel());
 }
-
-
-
-
-
-
-ko.applyBindings(new PlacesViewModel());
