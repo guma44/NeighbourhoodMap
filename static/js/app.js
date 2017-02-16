@@ -44,6 +44,7 @@ var PlacesViewModel = function() {
   var self = this;
   this.places = [];
   this.markers = [];
+  this.infowindows = [];
   this.isOpen = ko.observable(false);
   this.filterBy = ko.observable("");
   this.filteredPlaces = ko.observableArray();
@@ -82,16 +83,23 @@ var PlacesViewModel = function() {
              map: map,
              title: self.places[i].name,
              mapTypeControl: false,
+             animation: google.maps.Animation.DROP,
           });
           var infowindow = new google.maps.InfoWindow({
               content: '<span class="info-name">' + self.places[i].name + '<span>'
           });
           (function(marker, infowindow){
               marker.addListener('click', function(){
+                  for (var i = 0; i < self.infowindows.length; i++) {
+                      self.infowindows[i].close();
+                  }
+                  marker.setAnimation(google.maps.Animation.BOUNCE)
                   infowindow.open(map, marker);
+                  setTimeout(function(){ marker.setAnimation(null); }, 750);
               });
           })(marker, infowindow);
           self.markers[i] = marker;
+          self.infowindows[i] = infowindow;
           console.log(self.places[i].name)
       }
   }
