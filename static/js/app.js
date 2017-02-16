@@ -63,7 +63,11 @@ var PlacesViewModel = function() {
             if (self.places[i].name.toLowerCase().includes(self.filterBy().toLowerCase()) 
               || self.places[i].address.toLowerCase().includes(self.filterBy().toLowerCase())){
               self.filteredPlaces.push(self.places[i]);
+              self.markers[i].setVisible(true);
             }
+            else{
+              self.markers[i].setVisible(false);
+          }
           }
       }
       else {
@@ -92,8 +96,8 @@ var PlacesViewModel = function() {
       }
   }
 
-  this.filterPlaces();
   this.createMarkers();
+  this.filterPlaces();
 };
 
 // MAP INITIALIZATION
