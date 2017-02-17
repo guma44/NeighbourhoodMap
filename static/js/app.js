@@ -65,6 +65,9 @@ var PlacesViewModel = function() {
   }
   
   this.filterPlaces = function(){
+    for (var iid in self.infowindows) {
+        self.infowindows[iid].close();
+    }
       self.filteredPlaces([]);
       if (self.filterBy()){
           for (var id in self.places) {
@@ -85,6 +88,23 @@ var PlacesViewModel = function() {
           }
       }
   }
+  
+  this.showOnMap = function(place){
+    var marker = self.markers[place.id];
+    var infowindow = self.infowindows[place.id];
+    for (var iid in self.infowindows) {
+        self.infowindows[iid].close();
+    }
+    marker.setAnimation(google.maps.Animation.BOUNCE);
+    infowindow.open(map, marker);
+    setTimeout(function(){ marker.setAnimation(null); }, 750);
+  }
+  
+  this.bounceMarker = function(place){
+    var marker = self.markers[place.id];
+    marker.setAnimation(google.maps.Animation.BOUNCE);
+    setTimeout(function(){ marker.setAnimation(null); }, 750);
+  }
 
   this.createMarkers = function(){
       for (var id in self.places) {
@@ -103,7 +123,7 @@ var PlacesViewModel = function() {
                   for (var iid in self.infowindows) {
                       self.infowindows[iid].close();
                   }
-                  marker.setAnimation(google.maps.Animation.BOUNCE)
+                  marker.setAnimation(google.maps.Animation.BOUNCE);
                   infowindow.open(map, marker);
                   setTimeout(function(){ marker.setAnimation(null); }, 750);
               });

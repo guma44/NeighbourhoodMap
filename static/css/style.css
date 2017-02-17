@@ -41,3 +41,8 @@ body {
 .info-name {
     color: black;
 }
+
+.place-item:hover {
+  cursor: pointer;
+  font-weight: bold;
+}
