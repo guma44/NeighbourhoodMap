@@ -17,7 +17,7 @@
 				</div>
 				<div class="navbar-places">
 					<ul data-bind="foreach: filteredPlaces">
-						<li class="place-item" data-bind="event: {mouseover: $parent.bounceMarker}">
+						<li class="place-item" data-bind="event: {mouseover: $parent.presentSpecialMarker, mouseout: $parent.presentDefaultMarker}">
 							<span data-bind="text: name, click: $parent.showOnMap"></span>
 						</li>
 					</ul>

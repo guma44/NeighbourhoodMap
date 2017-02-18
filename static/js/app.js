@@ -106,6 +106,16 @@ var PlacesViewModel = function() {
     setTimeout(function(){ marker.setAnimation(null); }, 750);
   }
 
+  this.presentSpecialMarker = function(place){
+    var marker = self.markers[place.id];
+    marker.setIcon("static/img/darkgreen_MarkerA.png");
+  }
+
+  this.presentDefaultMarker = function(place){
+    var marker = self.markers[place.id];
+    marker.setIcon("static/img/blue_MarkerA.png");
+  }
+
   this.createMarkers = function(){
       for (var id in self.places) {
           var marker = new google.maps.Marker({
@@ -114,6 +124,7 @@ var PlacesViewModel = function() {
              title: self.places[id].name,
              mapTypeControl: false,
              animation: google.maps.Animation.DROP,
+             icon: "static/img/blue_MarkerA.png"
           });
           var infowindow = new google.maps.InfoWindow({
               content: '<span class="info-name">' + self.places[id].name + '<span>'
