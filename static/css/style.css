@@ -115,6 +115,13 @@ input {
     height: 100%;
 }
 
+.map-container {
+    background: #6d6d6d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .info {
     font-size: 12px;
     padding: 5px;

@@ -93,8 +93,9 @@ var Place = function(data) {
 /**
  *  ViewModel of a Place
  */
-var PlacesViewModel = function() {
+var PlacesViewModel = function(mapLoaded) {
     var self = this;
+    this.mapLoaded = mapLoaded || false;
     this.isOpen = ko.observable(false);
     this.filterBy = ko.observable("");
     this.filteredPlaces = ko.observableArray();
@@ -110,58 +111,72 @@ var PlacesViewModel = function() {
      */
     this.toggleIsOpen = function() {
         self.isOpen(!self.isOpen());
-    }
+    };
 
     /**
      * Filter places based on string from input field
      */
     this.filterPlaces = function() {
-        for (var iid in infowindows) {
-            infowindows[iid].close();
-        }
-        self.filteredPlaces([]);
-        if (self.filterBy()) {
-            for (var id in places) {
-                if (places[id].name.toLowerCase().includes(self.filterBy().toLowerCase()) ||
-                    places[id].address.toLowerCase().includes(self.filterBy().toLowerCase())) {
+        if (!self.mapLoaded) {
+            self.filteredPlaces([]);
+            if (self.filterBy()) {
+                for (var id in places) {
+                    if (places[id].name.toLowerCase().includes(self.filterBy().toLowerCase()) ||
+                        places[id].address.toLowerCase().includes(self.filterBy().toLowerCase())) {
+                        self.filteredPlaces.push(places[id]);
+                    }
+                }
+            } else {
+                for (var id in places) {
                     self.filteredPlaces.push(places[id]);
-                    markers[id].setVisible(true);
-                } else {
-                    markers[id].setVisible(false);
                 }
             }
-        } else {
-            for (var id in places) {
-                self.filteredPlaces.push(places[id]);
-                markers[id].setVisible(true);
+        }
+        else {
+            for (var iid in infowindows) {
+                infowindows[iid].close();
+            }
+            self.filteredPlaces([]);
+            if (self.filterBy()) {
+                for (var id in places) {
+                    if (places[id].name.toLowerCase().includes(self.filterBy().toLowerCase()) ||
+                        places[id].address.toLowerCase().includes(self.filterBy().toLowerCase())) {
+                        self.filteredPlaces.push(places[id]);
+                        markers[id].setVisible(true);
+                    } else {
+                        markers[id].setVisible(false);
+                    }
+                }
+            } else {
+                for (var id in places) {
+                    self.filteredPlaces.push(places[id]);
+                    markers[id].setVisible(true);
+                }
             }
         }
-    }
+    };
 
     /**
      * Show infowindow and animate marker.
      * @param  {Place} place Place to show
      */
     this.showOnMap = function(place) {
-        var marker = markers[place.id];
-        var infowindow = infowindows[place.id];
-        for (var iid in infowindows) {
-            infowindows[iid].close();
-        }
         // If we are in small device the map will be covered with menu. When an User
         // clicks the place we close it and show the map.
+        if (self.mapLoaded) {
+            var marker = markers[place.id];
+            var infowindow = infowindows[place.id];
+            for (var iid in infowindows) {
+                infowindows[iid].close();
+            }
+            google.maps.event.trigger(marker, 'click');
+        }
         self.isOpen(false);
-        marker.setAnimation(google.maps.Animation.BOUNCE);
-        infowindow.open(map, marker);
-        // Bounce only once
-        setTimeout(function() {
-            marker.setAnimation(null);
-        }, 750);
-    }
+    };
 
     /**
      * Animate marker of a place.
-     * @param  {Place} place Place to animate. 
+     * @param  {Place} place Place to animate.
      */
     this.bounceMarker = function(place) {
         var marker = markers[place.id];
@@ -170,25 +185,29 @@ var PlacesViewModel = function() {
         setTimeout(function() {
             marker.setAnimation(null);
         }, 750);
-    }
+    };
 
     /**
      * Change look of the marker to special.
      * @param  {Place} place Place to use.
      */
     this.presentSpecialMarker = function(place) {
-        var marker = markers[place.id];
-        marker.setIcon("static/img/darkgreen_MarkerA.png");
-    }
+        if (self.mapLoaded) {
+            var marker = markers[place.id];
+            marker.setIcon("static/img/darkgreen_MarkerA.png");
+        }
+    };
 
     /**
      * Change look of the marker to default.
      * @param  {Place} place Place to use.
      */
     this.presentDefaultMarker = function(place) {
-        var marker = markers[place.id];
-        marker.setIcon("static/img/blue_MarkerA.png");
-    }
+        if (self.mapLoaded) {
+            var marker = markers[place.id];
+            marker.setIcon("static/img/blue_MarkerA.png");
+        }
+    };
 
     /**
      * Create all the markers.
@@ -228,12 +247,14 @@ var PlacesViewModel = function() {
             // Call the function that will add the data to the infowindow.
             get4SInfo(places[id]);
         }
-    }
+    };
 
     /**
      * Initialize markers and places.
      */
-    this.createMarkers();
+    if (self.mapLoaded) {
+        this.createMarkers();
+    }
     this.filterPlaces();
 };
 
@@ -249,19 +270,19 @@ function get4SInfo(place) {
             client_id: foursquare_client_id,
             client_secret: foursquare_client_secret,
             v: foursquare_version,
-            query: place.name,
+            query: place.name || "",
             ll: place.location.lat.toString() + "," + place.location.lng.toString()
         },
         success: function(data) {
             // Icon for 4S downloaded from www.iconarchive.com
-            var fs_url = data["response"]["venue"]["canonicalUrl"];
+            var fs_url = data["response"]["venue"]["canonicalUrl"] || "#";
             var infowindowContent = '<h4 class="info-name">' + place.name + '</h4>' +
                 '<address style="color: black;">' + place.address + '</address>' +
                 '<a target="_blank" class="forsquare-url" href="' + fs_url +
                 '"><img width="30px" style="padding:5px;" src="static/img/Foursquare-5-icon.png"></a>';
             infowindows[place.id].setContent(infowindowContent);
         },
-        fail: function() {
+        error: function(err) {
             // If there is a fail we do not put anything. User does not need to see it.
             // We just print a message to the console.
             console.log("Checking data for ", place.name, "failed.");
@@ -355,5 +376,10 @@ function init() {
     });
     // We need a map initialized before doing any model. Thus we apply KO bindings
     // here
-    ko.applyBindings(new PlacesViewModel());
+    ko.applyBindings(new PlacesViewModel(true));
+}
+
+function mapError(){
+    alert("Cannot load Google Maps!");
+    ko.applyBindings(new PlacesViewModel(false));
 }

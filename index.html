@@ -2,6 +2,7 @@
 <html>
 
     <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta charset="utf-8" />
         <title>NeighborhoodMap</title>
 		<link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
@@ -34,12 +35,13 @@
                 <span id="title">BASEL BEER</span>
             </div>
             <div class="map-container" id="map">
+                <div>Cannot load Google Maps.</div>
             </div>
         </main>
     </body>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyARd-qEKEqp6IVNeYP3254ymDN-intfgXA&v=3&callback=init"></script>
     <script src="static/js/knockout-3.4.1.js" type="text/javascript"></script>
     <script src="static/js/jquery-3.1.1.min.js" type="text/javascript"></script>
     <script src="static/js/app.js" type="text/javascript"></script>
+    <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyARd-qEKEqp6IVNeYP3254ymDN-intfgXA&v=3&callback=init" onerror=mapError()></script>
 
 </html>
